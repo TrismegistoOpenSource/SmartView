@@ -1,0 +1,14 @@
+node_modules/
+out/
+# Gli artefatti veri stanno in ../build/, fuori dal repo: non serve ignorarli.
+# dist/ è solo l'output usato dalla CI (vedi -c.directories.output nel workflow).
+dist/
+*.log
+.DS_Store
+
+# veraPDF: binari/installer scaricati localmente (npm run verapdf:install)
+tools/verapdf/
+tools/verapdf-greenfield-*/
+tools/verapdf-installer.zip
+tools/auto-install.xml
+tools/samples/

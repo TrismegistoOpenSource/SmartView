@@ -1,0 +1,87 @@
+appId: com.smartview.desktop
+productName: SmartView
+# Garantisce node_modules/electron/dist prima del packaging: senza, gli
+# extraResources delle licenze Electron/Chromium verrebbero saltati in silenzio.
+beforePack: ./scripts/ensure-electron-dist.cjs
+directories:
+  buildResources: resources
+  # Lo schema del workspace vuole gli artefatti FUORI dal sorgente, in
+  # <versione>/build/. In CI questo percorso viene sovrascritto con
+  # `-c.directories.output=dist` perché upload-artifact rifiuta i percorsi
+  # fuori dalla workspace del runner.
+  output: ../build
+files:
+  - out/**/*
+  - package.json
+asar: true
+npmRebuild: false
+# sharp è un binario nativo (libvips): va estratto dall'asar per essere caricabile.
+asarUnpack:
+  - '**/node_modules/sharp/**'
+  - '**/node_modules/@img/**'
+
+# Asset a runtime (font + profilo ICC per l'export PDF/A): copiati in
+# process.resourcesPath. Vedi src/main/assets.ts.
+extraResources:
+  - from: resources/fonts
+    to: fonts
+  - from: resources/icc
+    to: icc
+  # Licenze: la GPL e le notice di terze parti devono ACCOMPAGNARE l'app
+  # distribuita, non solo stare nel repo. electron-builder non copia da sé
+  # le licenze di Electron/Chromium dentro il bundle macOS.
+  - from: LICENSE
+    to: licenses/LICENSE.txt
+  - from: THIRD-PARTY-LICENSES.md
+    to: licenses/THIRD-PARTY-LICENSES.md
+  - from: licenses
+    to: licenses
+  - from: node_modules/electron/dist/LICENSE
+    to: licenses/LICENSE.electron.txt
+  - from: node_modules/electron/dist/LICENSES.chromium.html
+    to: licenses/LICENSES.chromium.html
+
+# Associazione file: consente "Apri con SmartView" / viewer predefinito su tutti gli OS.
+fileAssociations:
+  - ext: pdf
+    name: PDF Document
+    description: Documento PDF
+    mimeType: application/pdf
+    role: Viewer
+    icon: resources/icon
+  - ext: [jpg, jpeg, png, webp, gif, tif, tiff, avif, heic, heif, svg, bmp]
+    name: Image
+    description: Immagine
+    role: Viewer
+    icon: resources/icon
+
+mac:
+  category: public.app-category.productivity
+  identity: null
+  icon: resources/icon.icns
+  # I binari di sharp/libvips sono per-arch: si producono due app ad architettura
+  # pura invece di un 'universal' (che con i nativi è problematico).
+  # L'architettura la sceglie la CLI (--arm64 / --x64), e ciascuna build
+  # sovrascrive appId e productName (vedi npm run dist:mac-arm / dist:mac-intel):
+  # con lo stesso appId macOS tratta le due app come la stessa e ne risolve una
+  # sola, facendo passare la arm64 per Intel.
+  target:
+    - target: dmg
+
+win:
+  icon: resources/icon.ico
+  target:
+    - target: nsis
+      arch: [x64]
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+
+linux:
+  category: Office
+  maintainer: nicoloevandri@ik.me
+  icon: resources/icon.png
+  target:
+    - AppImage
+    - deb

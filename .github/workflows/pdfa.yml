@@ -1,0 +1,51 @@
+name: PDF/A conformance (veraPDF)
+
+# Gate di regressione: verifica che l'export PDF/A resti REALMENTE conforme
+# (ISO 19005-2, profilo 2b) validando l'output dell'engine con veraPDF.
+# Se un cambiamento all'engine rompe la conformità, questa CI diventa rossa.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/main/pdf/**'
+      - 'src/shared/**'
+      - 'resources/**'
+      - 'scripts/install-verapdf.mjs'
+      - '.github/workflows/pdfa.yml'
+  pull_request:
+    paths:
+      - 'src/main/pdf/**'
+      - 'src/shared/**'
+      - 'resources/**'
+      - 'scripts/install-verapdf.mjs'
+      - '.github/workflows/pdfa.yml'
+  workflow_dispatch:
+
+jobs:
+  verapdf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # veraPDF è uno strumento Java: serve una JRE nel PATH.
+      - name: Setup Java (JRE per veraPDF)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install veraPDF CLI
+        run: npm run verapdf:install
+
+      # Genera un PDF/A per ogni percorso d'export e lo certifica con veraPDF.
+      - name: Validate PDF/A output (veraPDF 2b)
+        run: npm run test:pdfa
