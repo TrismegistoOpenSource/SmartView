@@ -23,7 +23,8 @@
  *   iconutil -c icns "$ICONSET" -o resources/icon.icns
  *
  * L'icona è il documento della GUI (IconDocument) ingrandito su una
- * piastrella arrotondata GRIGIO SCURO con il logo VIOLA.
+ * piastrella arrotondata identica a quella di RsyncGUI (stesso sfondo,
+ * stesso gradiente ciano→indigo — palette unificata tra le app Trismegisto).
  */
 const { app, BrowserWindow } = require('electron')
 const { writeFileSync } = require('node:fs')
@@ -32,23 +33,21 @@ const { writeFileSync } = require('node:fs')
 function iconSvg(size) {
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#2c303a"/>
-      <stop offset="1" stop-color="#1e2129"/>
+    <linearGradient id="bg" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#131620"/>
+      <stop offset="1" stop-color="#202433"/>
     </linearGradient>
     <linearGradient id="logo" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#a99cff"/>
-      <stop offset="1" stop-color="#7d6cf0"/>
+      <stop offset="0" stop-color="#4fd1ff"/>
+      <stop offset="1" stop-color="#5b6cff"/>
     </linearGradient>
-    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-      <feDropShadow dx="0" dy="0" stdDeviation="13" flood-color="#8b7bff" flood-opacity="0.55"/>
-    </filter>
   </defs>
-  <rect x="6" y="6" width="${size - 12}" height="${size - 12}" rx="224" ry="224"
-        fill="url(#bg)" stroke="#3a3f4b" stroke-width="4"/>
+  <rect x="20" y="20" width="${size - 40}" height="${size - 40}" rx="220" ry="220" fill="url(#bg)"/>
+  <rect x="23" y="23" width="${size - 46}" height="${size - 46}" rx="217" ry="217"
+        fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6"/>
   <g transform="translate(116,104) scale(33)"
      fill="none" stroke="url(#logo)" stroke-width="1.05"
-     stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+     stroke-linecap="round" stroke-linejoin="round">
     <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/>
     <path d="M14 3v5h5"/>
     <path d="M9 13h6"/>
